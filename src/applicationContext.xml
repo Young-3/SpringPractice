@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns="http://www.springframework.org/schema/beans"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+
+    <!--配置扫描器-->
+    <context:component-scan base-package="main.org.young"></context:component-scan>
+
+
+    <!--配置数据库相关-事务-->
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+        <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"></property>
+        <property name="url" value="jdbc:mysql://localhost:3306/user"></property>
+        <property name="username" value="root"></property>
+        <property name="password" value="10010.com"></property>
+        <property name="maxActive" value="10"></property>
+        <property name="maxIdle" value="6"></property>
+    </bean>
+
+
+    <!--配置事务管理器transactionManager，依赖于dataSource-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+
+
+    <!--增加事务的支持,依赖txManager-->
+    <tx:annotation-driven transaction-manager="transactionManager"></tx:annotation-driven>
+
+
+
+
+
+
+    <!--SpringIOC容器:创建对象、给对象的属性赋值-->
+    <!-- <bean id="student" class="main.org.young.entity.Student">
+         &lt;!&ndash;set&ndash;&gt;
+         <property name="stuNo" value="1"></property>
+         <property name="stuName" value="ls"></property>
+         <property name="stuAge" value="24"></property>
+     </bean>
+ -->
+    <!--   <bean id="studentDao" class="main.org.young.dao.daoImpl.StudentDaoImpl">
+
+       </bean>-->
+
+    <bean id="javaCourse" class="main.org.young.newinstance.JavaCourse"></bean>
+    <bean id="htmlCourse" class="main.org.young.newinstance.HtmlCourse"></bean>
+
+    <bean id="teacher" class="main.org.young.entity.Teacher" p:name="ww" p:age="25">
+        <!--  <property name="name" value="zs"></property>
+          <property name="age" value="24"></property>-->
+
+        <!--
+                <constructor-arg value="ls" name="name"></constructor-arg>
+                <constructor-arg value="24" name="age"></constructor-arg>
+        -->
+
+    </bean>
+
+    <bean id="course" class="main.org.young.entity.Course" p:courseName="c++" p:courseHour="200" p:teacher-ref="teacher">
+        <!--        <property name="courseName" value="java"></property>
+                <property name="courseHour" value="200"></property>
+                <property name="teacher" ref="teacher"></property>
+                -->
+
+        <!--构造器注入
+          <constructor-arg value="c" name="courseName"></constructor-arg>
+          <constructor-arg value="100" name="courseHour"></constructor-arg>
+          <constructor-arg ref="teacher" name="teacher"></constructor-arg>
+           -->
+    </bean>
+
+
+    <bean id="conllectionDemo" class="main.org.young.entity.AllConllectionType">
+        <property name="listElement">
+            <list>
+                <value>football1</value>
+                <value>basketball1</value>
+                <value>pingpong1</value>
+            </list>
+        </property>
+
+        <property name="arrayElenment">
+            <array>
+                <value>football2</value>
+                <value>basketball2</value>
+                <value>pingpong3</value>
+            </array>
+        </property>
+
+        <property name="setElenment">
+            <set>
+                <value>football</value>
+                <value>football1</value>
+                <value>football2</value>
+            </set>
+        </property>
+        <property name="mapElenment">
+            <map>
+                <entry>
+                    <key>
+                        <value>foot</value>
+                    </key>
+                    <value>football3</value>
+                </entry>
+            </map>
+        </property>
+
+        <property name="props">
+            <props>
+                <prop key="foot4">football4</prop>
+                <prop key="basket44">basketball4</prop>
+                <prop key="pp4">pingpong4</prop>
+            </props>
+        </property>
+
+    </bean>
+
+ <!--   &lt;!&ndash;开启注解对aop的支持&ndash;&gt;
+    <aop:aspectj-autoproxy></aop:aspectj-autoproxy>-->
+
+<!--    <bean id="studentDao" class="main.org.young.dao.daoImpl.StudentDaoImpl"></bean>-->
+
+    <!--配置前置通知-->
+    <!--addStudent方法所在位置-->
+    <bean id="studentService" class="main.org.young.service.serviceImpl.StudentServiceImpl">
+        <property name="studentDao" ref="studentDao"></property>
+    </bean>
+
+<!--    &lt;!&ndash;“前置通知”类&ndash;&gt;
+    <bean id="logBefore" class="main.org.young.aop.LogBefore"></bean>
+
+    &lt;!&ndash;将addStudent()和前置通知相关联&ndash;&gt;
+    <aop:config proxy-target-class="true">
+        &lt;!&ndash;切入点(在哪里执行)&ndash;&gt;
+        &lt;!&ndash;======连接线的另一方======&ndash;&gt;
+        <aop:pointcut id="poincut1" expression="execution(public * main.org.young.service.serviceImpl.StudentServiceImpl.addStudent(..)) or execution(public * main.org.young.service.serviceImpl.StudentServiceImpl.deleteStudentByNo(..) )"/>
+
+
+        &lt;!&ndash;advisor相当于 链接切入点和切面的线&ndash;&gt;
+        &lt;!&ndash;=====连接线====&ndash;&gt;
+        <aop:advisor advice-ref="logBefore" pointcut-ref="poincut1"/>
+    </aop:config>-->
+
+<!--
+    &lt;!&ndash;“后置通知”类&ndash;&gt;
+    <bean id="logAfter" class="main.org.young.aop.LogAfter"></bean>
+    <aop:config>
+        &lt;!&ndash;切入点(连接线的一端：业务的具体方法)&ndash;&gt;
+        <aop:pointcut id="poincut2" expression="execution(public * main.org.young.service.serviceImpl.StudentServiceImpl.addStudent(..))"/>
+        &lt;!&ndash;连接线的另一端（通知 类）&ndash;&gt;
+        <aop:advisor advice-ref="logAfter" pointcut-ref="poincut2"/>
+    </aop:config>
+
+    &lt;!&ndash;“异常”通知&ndash;&gt;
+    <bean id="logException" class="main.org.young.aop.LogException"/>
+    <aop:config>
+        &lt;!&ndash;切入点(连接线的一端：业务的具体方法)&ndash;&gt;
+        <aop:pointcut id="poincut3" expression="execution(public * main.org.young.service.serviceImpl.StudentServiceImpl.addStudent(..))"/>
+        &lt;!&ndash;连接线的另一端（通知 类）&ndash;&gt;
+        <aop:advisor advice-ref="logException" pointcut-ref="poincut3"/>
+    </aop:config>
+-->
+
+    <!--
+
+  &lt;!&ndash;  环绕通知&ndash;&gt;
+    <bean id="logAround" class="main.org.young.aop.LogAround"></bean>
+    <aop:config>
+        &lt;!&ndash;切入点(连接线的一端：业务的具体方法)&ndash;&gt;
+        <aop:pointcut id="poincut4" expression="execution(public * main.org.young.service.serviceImpl.StudentServiceImpl.addStudent(..))"/>
+        &lt;!&ndash;连接线的另一端（通知 类）&ndash;&gt;
+        <aop:advisor advice-ref="logAround" pointcut-ref="poincut4"/>
+    </aop:config>
+-->
+
+    <!--开启注解对aop的支持-->
+    <aop:aspectj-autoproxy proxy-target-class="true"></aop:aspectj-autoproxy>
+    <bean id="logAspectAnnotation" class="main.org.young.aop.LogAspectAnnotation"></bean>
+
+
+
+</beans>
